@@ -11,7 +11,13 @@ const addLeadSchema = z.object({
   phone: z.string().optional(),
 });
 
-export async function addLead(prevState: any, formData: FormData) {
+// Define a proper type for the previous state
+interface ActionResult {
+  error?: Record<string, string[]>;
+  success?: boolean;
+}
+
+export async function addLead(prevState: ActionResult, formData: FormData) {
   // Extract form data
   const name = formData.get('name');
   const email = formData.get('email');
