@@ -11,13 +11,26 @@ const addLeadSchema = z.object({
   phone: z.string().optional(),
 });
 
-// Define a proper type for the previous state
-interface ActionResult {
-  error?: Record<string, string[]>;
-  success?: boolean;
+// Define proper types
+interface FormErrors {
+  error?: {
+    name?: string[];
+    email?: string[];
+    phone?: string[];
+  };
 }
 
-export async function addLead(prevState: ActionResult, formData: FormData) {
+interface SuccessResult {
+  success: boolean;
+}
+
+interface ErrorResult {
+  error: string;
+}
+
+export type ActionResult = FormErrors | SuccessResult | ErrorResult;
+
+export async function addLead(prevState: unknown, formData: FormData): Promise<ActionResult> {
   // Extract form data
   const name = formData.get('name');
   const email = formData.get('email');
