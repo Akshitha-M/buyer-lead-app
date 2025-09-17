@@ -4,8 +4,13 @@
 import { useActionState } from 'react';
 import { addLead } from '@/actions/add-lead';
 
+// Create a wrapper function that matches useActionState's expected signature
+function addLeadWrapper(prevState: any, formData: FormData) {
+  return addLead(prevState, formData);
+}
+
 export default function Home() {
-  const [state, formAction, isPending] = useActionState(addLead, null);
+  const [state, formAction, isPending] = useActionState(addLeadWrapper, null);
 
   return (
     <div className="container mx-auto p-4 max-w-md">
@@ -36,7 +41,9 @@ export default function Home() {
           {isPending ? 'Submitting...' : 'Submit'}
         </button>
         
-        {state?.error && <p className="text-red-500 text-sm">{state.error}</p>}
+        {state?.error && typeof state.error === 'string' && (
+          <p className="text-red-500 text-sm">{state.error}</p>
+        )}
         {state?.success && <p className="text-green-500 text-sm">Thank you for your interest!</p>}
       </form>
     </div>
