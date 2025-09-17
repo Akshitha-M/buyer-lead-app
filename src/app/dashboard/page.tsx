@@ -2,9 +2,9 @@
 import { db } from '@/db';
 import { leads } from '@/db/schema';
 import { desc } from 'drizzle-orm';
+import { StatusDropdown } from '@/components/StatusDropdown';
 
 export default async function DashboardPage() {
-  // Fetch all leads from the database, newest first
   const allLeads = await db.select().from(leads).orderBy(desc(leads.createdAt));
 
   return (
@@ -31,9 +31,7 @@ export default async function DashboardPage() {
                 <td className="px-4 py-2">{lead.email}</td>
                 <td className="px-4 py-2">{lead.phone || 'N/A'}</td>
                 <td className="px-4 py-2">
-                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                    {lead.status}
-                  </span>
+                  <StatusDropdown leadId={lead.id} currentStatus={lead.status} />
                 </td>
                 <td className="px-4 py-2">
                   {new Date(lead.createdAt).toLocaleDateString()}
