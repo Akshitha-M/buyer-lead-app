@@ -11,23 +11,38 @@ const addLeadSchema = z.object({
   phone: z.string().optional(),
 });
 
-export async function addLead(formData: FormData) {
+export async function addLead(prevState: any, formData: FormData) {
+  // Extract form data
+  const name = formData.get('name');
+  const email = formData.get('email');
+  const phone = formData.get('phone');
+
+  // Validate input
   const validatedFields = addLeadSchema.safeParse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    phone: formData.get('phone'),
+    name,
+    email,
+    phone,
   });
 
+  // Return errors if validation fails
   if (!validatedFields.success) {
-    return { error: validatedFields.error.flatten().fieldErrors };
+    return {
+      error: validatedFields.error.flatten().fieldErrors,
+    };
   }
 
-  const { name, email, phone } = validatedFields.data;
+  const { name: validatedName, email: validatedEmail, phone: validatedPhone } = validatedFields.data;
 
   try {
-    await db.insert(leads).values({ name, email, phone });
+    // Insert into database
+    await db.insert(leads).values({ 
+      name: validatedName, 
+      email: validatedEmail, 
+      phone: validatedPhone 
+    });
     return { success: true };
   } catch (error) {
+    console.error('Database error:', error);
     return { error: 'Failed to create lead' };
   }
 }

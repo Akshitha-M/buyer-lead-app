@@ -1,8 +1,7 @@
 // src/components/StatusDropdown.tsx
 'use client';
 
-import { useActionState } from 'react';
-import { updateLeadStatus } from '@/actions/update-status';
+import { useRouter } from 'next/navigation';
 
 interface StatusDropdownProps {
   leadId: string;
@@ -10,32 +9,39 @@ interface StatusDropdownProps {
 }
 
 export function StatusDropdown({ leadId, currentStatus }: StatusDropdownProps) {
-  const [state, action, isPending] = useActionState(
-    (prevState: any, formData: FormData) => {
-      const newStatus = formData.get('status') as string;
-      return updateLeadStatus(leadId, newStatus);
-    },
-    null
-  );
+  const router = useRouter();
+
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      const response = await fetch('/api/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ leadId, newStatus }),
+      });
+
+      if (response.ok) {
+        router.refresh(); // Refresh the page to show updated status
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
 
   const statusOptions = ['NEW', 'CONTACTED', 'CLOSED', 'INTERESTED', 'NOT_INTERESTED'];
 
   return (
-    <form action={action}>
-      <select 
-        name="status" 
-        defaultValue={currentStatus}
-        disabled={isPending}
-        onChange={(e) => e.target.form?.requestSubmit()}
-        className="px-2 py-1 border rounded text-sm"
-      >
-        {statusOptions.map((status) => (
-          <option key={status} value={status}>
-            {status}
-          </option>
-        ))}
-      </select>
-      {isPending && <span className="ml-2 text-xs">Updating...</span>}
-    </form>
+    <select 
+      value={currentStatus}
+      onChange={(e) => handleStatusChange(e.target.value)}
+      className="px-2 py-1 border rounded text-sm"
+    >
+      {statusOptions.map((status) => (
+        <option key={status} value={status}>
+          {status}
+        </option>
+      ))}
+    </select>
   );
 }
